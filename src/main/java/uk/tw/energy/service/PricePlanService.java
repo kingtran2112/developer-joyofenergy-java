@@ -25,14 +25,11 @@ public class PricePlanService {
 
     public Optional<Map<String, BigDecimal>> getConsumptionCostOfElectricityReadingsForEachPricePlan(
             String smartMeterId) {
-        Optional<List<ElectricityReading>> electricityReadings = meterReadingService.getReadings(smartMeterId);
-
-        if (!electricityReadings.isPresent()) {
-            return Optional.empty();
-        }
-
-        return Optional.of(pricePlans.stream()
-                .collect(Collectors.toMap(PricePlan::getPlanName, t -> calculateCost(electricityReadings.get(), t))));
+        return meterReadingService
+                .getReadings(smartMeterId)
+                .map(readings -> pricePlans
+                        .stream()
+                        .collect(Collectors.toMap(PricePlan::getPlanName, t -> calculateCost(readings, t))));
     }
 
     private BigDecimal calculateCost(List<ElectricityReading> electricityReadings, PricePlan pricePlan) {
